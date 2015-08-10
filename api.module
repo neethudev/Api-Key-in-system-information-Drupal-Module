@@ -1,0 +1,60 @@
+<?php
+	
+	/*** Function to add api key field in site information section***/
+	function api_form_alter(&$form, $form_state, $form_id) {
+		
+	    // Check the form id 
+	    if ($form_id == 'system_site_information_settings') {
+			// Populate api key entered or else show default
+			$apiKey = (variable_get('siteapikey') !="" ? variable_get('siteapikey') : 'No API Key yet');   
+			// Create the field
+			$form['siteapikey'] = array(
+			  '#type' => 'textfield',
+			  '#title' => t('Site API Key'),
+			  '#default_value' => $apiKey,
+			);
+			
+			// Update Submit button text
+			$form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Update Configuration'));
+	  }
+	}
+
+	/*** Function to get access from URL 
+	 ** Eg: url: http://127.0.0.1:8080/drupal/page_json/FOOBAR12345/1
+	 ** Refernece Links:http://drupal.stackexchange.com/questions/49361/how-can-my-drupal-module-expose-custom-urls
+	**/
+    function api_menu() { 
+   
+		$items['page_json/%/%'] = array(
+			'access callback' => TRUE,
+			   'page callback' => 'api_callback_func',
+			   
+			'page arguments' => array(1, 2),
+			);
+		return $items;
+	}
+	
+	/*** Function to check the api key and node type **/
+	
+	function api_callback_func($arg1, $arg2) {
+	
+		// Get Api key
+	    $apiSet = variable_get('siteapikey');
+		if (is_numeric($arg2)) {
+		    $nid = $arg2;
+		    $node = node_load( $nid);
+		    $type = $node->type;
+			
+			// Check node type is page and api key 
+		    if ($type == 'page' && $apiSet==$arg1) {
+				
+				//Convert node object to json format
+				drupal_json_output($node);
+		    }
+			else {
+				echo 'Access Denied';
+		    }
+		}  
+	}
+
+?>

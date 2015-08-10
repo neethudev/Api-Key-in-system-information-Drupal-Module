@@ -1,0 +1,4 @@
+core = "7.x"
+description = "Custom module to add api field to site information and get node content in json format based on api key and node id"
+name = "Api Module"
+version = "7.x"
